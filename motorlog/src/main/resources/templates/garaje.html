@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MotorLog - Mi Garaje</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f4f9; }
+        .navbar { background-color: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .vehiculo-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; background: #fff; text-align: center; }
+        input { padding: 8px; margin: 5px 0; width: 90%; }
+        button { background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Navegación -->
+    <div class="navbar">
+        <h2>MotorLog ⚙️🚗</h2>
+        <div>Inicio | Mi Garaje | Perfil</div>
+    </div>
+
+    <div class="container">
+        
+        <!-- Formulario para añadir vehículo (HU 1.1) -->
+        <div class="card">
+            <h3>+ Añadir Nuevo Vehículo</h3>
+            <form th:action="@{/guardarVehiculo}" th:object="${nuevoVehiculo}" method="post">
+                <input type="text" th:field="*{marca}" placeholder="Marca (Ej. Fiat)" required>
+                <input type="text" th:field="*{modelo}" placeholder="Modelo (Ej. Grande Punto 1.4)" required>
+                <input type="text" th:field="*{matricula}" placeholder="Matrícula" required>
+                <input type="number" th:field="*{kilometraje}" placeholder="Kilometraje actual" required>
+                <button type="submit">Guardar Vehículo</button>
+            </form>
+        </div>
+
+        <!-- Listado de vehículos (HU 1.2) -->
+        <h2>Mis Vehículos Registrados</h2>
+        <div class="grid">
+            <!-- Thymeleaf repetirá este bloque por cada coche en la BBDD -->
+            <div th:each="coche : ${vehiculos}" class="vehiculo-card">
+                <h3 th:text="${coche.marca} + ' ' + ${coche.modelo}">Marca Modelo</h3>
+                <p><strong>Matrícula:</strong> <span th:text="${coche.matricula}">0000XXX</span></p>
+                <p><strong>Kilometraje:</strong> <span th:text="${coche.kilometraje}">0</span> km</p>
+                <button>Ver Historial</button>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(vehiculos)}">
+                <p>Tu garaje está vacío. ¡Añade tu primer coche!</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
