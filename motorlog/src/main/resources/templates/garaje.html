@@ -45,7 +45,7 @@
                 <h3 th:text="${coche.marca} + ' ' + ${coche.modelo}">Marca Modelo</h3>
                 <p><strong>Matrícula:</strong> <span th:text="${coche.matricula}">0000XXX</span></p>
                 <p><strong>Kilometraje:</strong> <span th:text="${coche.kilometraje}">0</span> km</p>
-                <button>Ver Historial</button>
+                <a th:href="@{/vehiculo/{id}(id=${coche.id})}"><button type="button">Ver Historial</button></a>
             </div>
             
             <div th:if="${#lists.isEmpty(vehiculos)}">
