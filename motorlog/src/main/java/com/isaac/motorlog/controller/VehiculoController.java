@@ -22,41 +22,66 @@ public class VehiculoController {
     @Autowired
     private IntervencionRepository intervencionRepository;
 
-    // Esta ruta mostrará la pantalla principal (El Garaje) con la lista de coches
+    // --- RUSTAS DE VEHÍCULOS ---
+
     @GetMapping("/garaje")
     public String mostrarGaraje(Model model) {
         model.addAttribute("vehiculos", vehiculoRepository.findAll());
-        model.addAttribute("nuevoVehiculo", new Vehiculo()); // Preparamos un coche vacío para el formulario
-        return "garaje"; // Esto buscará un archivo llamado garaje.html
+        model.addAttribute("nuevoVehiculo", new Vehiculo());
+        return "garaje";
     }
 
-    // Esta ruta recibe los datos del formulario y guarda el coche en MySQL
     @PostMapping("/guardarVehiculo")
-    public String guardarVehiculo(Vehiculo vehiculo) {
+    public String guardarVehiculo(@ModelAttribute Vehiculo vehiculo) {
         vehiculoRepository.save(vehiculo);
-        return "redirect:/garaje"; // Recarga la página para ver el coche nuevo
+        return "redirect:/garaje";
     }
 
-    // HU 2.2: Ver el historial de un coche específico
+    // HU 3.1: Borrar vehículo en cascada
+    @GetMapping("/vehiculo/borrar/{id}")
+    public String borrarVehiculo(@PathVariable Long id) {
+        vehiculoRepository.deleteById(id);
+        return "redirect:/garaje";
+    }
+
+    // HU 3.2: Cargar vista de edición
+    @GetMapping("/vehiculo/editar/{id}")
+    public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
+        Vehiculo vehiculo = vehiculoRepository.findById(id).orElseThrow();
+        model.addAttribute("vehiculo", vehiculo);
+        return "editar-vehiculo";
+    }
+
+    // HU 3.2: Guardar cambios de edición
+    @PostMapping("/vehiculo/actualizar")
+    public String actualizarVehiculo(@ModelAttribute Vehiculo vehiculo) {
+        vehiculoRepository.save(vehiculo); // Si el objeto lleva ID, Spring Boot hace UPDATE en lugar de INSERT
+        return "redirect:/garaje";
+    }
+
+    // --- RUTAS DE INTERVENCIONES ---
+
     @GetMapping("/vehiculo/{id}")
     public String verHistorial(@PathVariable Long id, Model model) {
-        // Buscamos el coche por su ID
         Vehiculo vehiculo = vehiculoRepository.findById(id).orElseThrow();
-        
         model.addAttribute("vehiculo", vehiculo);
         model.addAttribute("intervenciones", intervencionRepository.findByVehiculoIdOrderByFechaDesc(id));
-        model.addAttribute("nuevaIntervencion", new Intervencion()); // Para el formulario
-        
-        return "historial"; // Crearemos historial.html a continuación
+        model.addAttribute("nuevaIntervencion", new Intervencion());
+        return "historial";
     }
 
-    // HU 2.1: Guardar una nueva intervención (ej. cambio de ruedas)
     @PostMapping("/guardarIntervencion/{vehiculoId}")
     public String guardarIntervencion(@PathVariable Long vehiculoId, @ModelAttribute Intervencion intervencion) {
         Vehiculo vehiculo = vehiculoRepository.findById(vehiculoId).orElseThrow();
-        intervencion.setVehiculo(vehiculo); // Le asignamos el coche a la intervención
+        intervencion.setVehiculo(vehiculo);
         intervencionRepository.save(intervencion);
-        
-        return "redirect:/vehiculo/" + vehiculoId; // Recargamos la vista del historial
+        return "redirect:/vehiculo/" + vehiculoId;
+    }
+
+    // HU 3.3: Borrar una intervención individual
+    @GetMapping("/intervencion/borrar/{id}/{vehiculoId}")
+    public String borrarIntervencion(@PathVariable Long id, @PathVariable Long vehiculoId) {
+        intervencionRepository.deleteById(id);
+        return "redirect:/vehiculo/" + vehiculoId;
     }
 }
